@@ -1,0 +1,27 @@
+module qvto.gradle.test
+
+import org.eclipse.emf.mwe.utils.*
+import org.eclipse.ocl.xtext.essentialocl.EssentialOCLStandaloneSetup
+import qvto.gradle.test.QVToTransformationExecutor
+
+var targetDir = 'target/generated-resources/model'
+
+Workflow {
+    bean = StandaloneSetup {
+        scanClassPath = true
+        registerGeneratedEPackage = 'org.eclipse.emf.ecore.EcorePackage'
+    }
+
+    bean = EssentialOCLStandaloneSetup { }
+
+    component = DirectoryCleaner {
+        directory = targetDir
+    }
+
+    component = QVToTransformationExecutor {
+        uri = 'src/main/qvto/EcoreToEcore.qvto'
+        in = 'http://www.eclipse.org/emf/2002/Ecore'
+        out = "${targetDir}/result.ecore"
+        validate = false
+    }
+}

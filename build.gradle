@@ -1,0 +1,75 @@
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+ext.xtextVersion = '2.16.0'
+ext.mwe2Version = '2.10.0.M2'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+configurations {
+    mwe2 {
+        extendsFrom compile
+    }
+}
+
+dependencies {
+    compile 'org.eclipse.emf:org.eclipse.emf.common:2.15.0'
+    compile 'org.eclipse.emf:org.eclipse.emf.ecore:2.15.0'
+    compile 'org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.15.0'
+
+    compile "org.eclipse.emf:org.eclipse.emf.mwe2.lib:${mwe2Version}"
+    compile "org.eclipse.emf:org.eclipse.emf.mwe2.runtime:${mwe2Version}"
+    compile "org.eclipse.emf:org.eclipse.emf.mwe2.launch:${mwe2Version}"
+
+    compile 'org.eclipse.equinox:org.eclipse.equinox.common:3.6.200.v20130402-1505'
+
+    compile 'log4j:log4j:1.2.17'
+
+    compile files('libs/org.eclipse.jdt.annotation_2.2.200.v20180921-1416.jar')
+    compile files('libs/org.eclipse.ocl.common_1.8.100.v20181210-1441.jar')
+    compile files('libs/org.eclipse.ocl.pivot_1.6.0.v20181210-1441.jar')
+    compile files('libs/org.eclipse.m2m.qvt.oml_3.9.1.v20181210-1559.jar')
+    compile files('libs/org.eclipse.m2m.qvt.oml.common_3.9.0.v20181210-1559.jar')
+    compile files('libs/org.eclipse.m2m.qvt.oml.cst.parser_3.9.0.v20181210-1559.jar')
+}
+
+dependencies {
+    mwe2 "org.eclipse.emf:org.eclipse.emf.mwe2.launch:2.10.0.M2"
+    mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:${xtextVersion}"
+    mwe2 "org.eclipse.xtext:org.eclipse.xtext.ecore:${xtextVersion}"
+    // added for Xcore support
+    mwe2('org.eclipse.emf:org.eclipse.emf.ecore.xcore:1.3.1'){
+        exclude group: 'org.antlr', module: 'antlr-runtime'
+    }
+    mwe2 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.3.0'
+    mwe2 'org.eclipse.emf:org.eclipse.emf.codegen.ecore.xtext:1.2.0'
+
+    mwe2 "org.eclipse.xtext:org.eclipse.xtext.common.types:${xtextVersion}"
+
+    mwe2 files('libs/org.eclipse.ocl_3.10.100.v20181210-1441.jar')
+    mwe2 files('libs/org.eclipse.ocl.ecore_3.10.100.v20181210-1441.jar')
+    mwe2 files('libs/org.eclipse.m2m.qvt.oml.emf.util_3.9.0.v20181210-1559.jar')
+    mwe2 files('libs/org.eclipse.ocl.xtext.essentialocl_1.6.0.v20181210-1441.jar')
+
+    // Required to find qvto.gradle.test.QVToTransformationExecutor
+    mwe2 project(':')
+}
+
+task runQVTo(type: JavaExec) {
+    main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
+    classpath = configurations.mwe2
+    inputs.file "src/main/mwe2/run.mwe2"
+    outputs.dir "src-gen"
+    args += "src/main/mwe2/run.mwe2"
+    args += "-p"
+    args += "rootPath=/${projectDir}/.."
+}
+
+build.dependsOn(runQVTo)
+eclipse.classpath.plusConfigurations += [configurations.mwe2]

@@ -1,0 +1,14 @@
+modeltype ECORE uses 'http://www.eclipse.org/emf/2002/Ecore';
+
+transformation XcoreToViewModel(in ecoremm : ECORE, out ecore : ECORE);
+
+main() {
+    ecore.objectsOfKind(EPackage)->toPackage();
+}
+
+mapping EPackage::toPackage() : EPackage {
+    log(self.name);
+    name := self.name;
+    nsURI := self.nsURI;
+    nsPrefix := self.nsPrefix;
+}
